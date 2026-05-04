@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Level Up Real</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: #050816;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 15px;
+    }
+
+    h1 {
+      text-align: center;
+      color: cyan;
+    }
+
+    .box {
+      border: 1px solid cyan;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #00f7ff33;
+    }
+
+    .task {
+      display: flex;
+      justify-content: space-between;
+      margin: 6px 0;
+    }
+
+    button {
+      background: cyan;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button.done {
+      background: #333;
+      color: #aaa;
+    }
+
+    .xp-bar {
+      width: 100%;
+      height: 18px;
+      background: #222;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .xp-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, cyan, lime);
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>🎮 LEVEL UP REAL</h1>
+
+<div class="box">
+  <h3>Nível: <span id="level">1</span></h3>
+  <h3>XP: <span id="xp">0</span>/10</h3>
+
+  <div class="xp-bar">
+    <div class="xp-fill" id="xpFill"></div>
+  </div>
+</div>
+
+<div class="box">
+  <h3>Pontos do dia: <span id="points">0</span></h3>
+</div>
+
+<div class="box">
+  <h3>Missões</h3>
+
+  <div class="task">Leitura <button onclick="complete(this)">+1</button></div>
+  <div class="task">Escrita <button onclick="complete(this)">+1</button></div>
+  <div class="task">Estudo <button onclick="complete(this)">+1</button></div>
+  <div class="task">Falar devagar <button onclick="complete(this)">+1</button></div>
+  <div class="task">Bíblia <button onclick="complete(this)">+1</button></div>
+  <div class="task">Sem espinhas <button onclick="complete(this)">+1</button></div>
+  <div class="task">Menos celular <button onclick="complete(this)">+1</button></div>
+  <div class="task">Água (4-5 garrafas) <button onclick="complete(this)">+1</button></div>
+  <div class="task">Afazeres <button onclick="complete(this)">+1</button></div>
+  <div class="task">Foco total <button onclick="complete(this)">+1</button></div>
+
+</div>
+
+<script>
+  let points = 0;
+  let xp = 0;
+  let level = 1;
+
+  function complete(btn) {
+    if (btn.disabled) return;
+
+    points++;
+    xp++;
+
+    document.getElementById("points").innerText = points;
+    document.getElementById("xp").innerText = xp;
+
+    btn.disabled = true;
+    btn.innerText = "✔";
+    btn.classList.add("done");
+
+    updateXP();
+  }
+
+  function updateXP() {
+    let percent = (xp / 10) * 100;
+    document.getElementById("xpFill").style.width = percent + "%";
+
+    if (xp >= 10) {
+      level++;
+      xp = 0;
+
+      document.getElementById("level").innerText = level;
+      document.getElementById("xp").innerText = xp;
+
+      alert("🔥 LEVEL UP! Agora você é nível " + level);
+
+      updateXP();
+    }
+  }
+</script>
+
+</body>
+</html>:
