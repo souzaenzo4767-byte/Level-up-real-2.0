@@ -9,7 +9,7 @@
 body{
   margin:0;
   font-family:Arial;
-  background:#030712;
+  background:radial-gradient(circle,#050816,#02030a);
   color:#fff;
 }
 
@@ -22,15 +22,21 @@ body{
 h1{
   text-align:center;
   color:#00f7ff;
+  text-shadow:0 0 20px #00f7ff;
 }
 
 .panel{
   background:#0b1226;
-  border:1px solid #00f7ff33;
+  border:1px solid #00f7ff44;
   border-radius:15px;
   padding:15px;
-  margin:10px 0;
-  box-shadow:0 0 15px #00f7ff22;
+  margin:12px 0;
+  box-shadow:0 0 25px #00f7ff22;
+  transition:0.3s;
+}
+
+.panel:hover{
+  transform:scale(1.01);
 }
 
 .flex{
@@ -39,7 +45,7 @@ h1{
 }
 
 .bar{
-  height:10px;
+  height:12px;
   background:#111;
   border-radius:10px;
   overflow:hidden;
@@ -50,20 +56,27 @@ h1{
   height:100%;
   width:0%;
   background:linear-gradient(90deg,#00f7ff,#00ff88);
+  box-shadow:0 0 10px #00f7ff;
+  transition:0.4s;
 }
 
 .task{
   display:flex;
   justify-content:space-between;
-  margin:8px 0;
-  border-bottom:1px solid #ffffff11;
+  margin:10px 0;
 }
 
 button{
-  background:#00f7ff;
+  background:linear-gradient(90deg,#00f7ff,#00ff88);
   border:none;
   padding:6px 12px;
   border-radius:8px;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+button:active{
+  transform:scale(0.9);
 }
 
 button.done{
@@ -73,9 +86,35 @@ button.done{
 
 .badge{
   background:#111;
-  padding:5px;
+  padding:6px;
+  margin:6px 0;
+  border-radius:8px;
+  border:1px solid #00ff8844;
+}
+
+.history-card{
+  background:#060b1a;
+  padding:8px;
   margin:5px 0;
   border-radius:8px;
+}
+
+.levelup{
+  position:fixed;
+  top:40%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:28px;
+  color:#00ff88;
+  text-shadow:0 0 20px #00ff88;
+  display:none;
+  animation:pop 1s ease;
+}
+
+@keyframes pop{
+  0%{transform:translate(-50%,-50%) scale(0.5);opacity:0}
+  50%{scale:1.2}
+  100%{opacity:1}
 }
 </style>
 </head>
@@ -91,9 +130,7 @@ button.done{
     <div>Nível: <span id="level"></span></div>
     <div>XP: <span id="xp"></span>/10</div>
   </div>
-  <div class="bar">
-    <div id="xpFill" class="fill"></div>
-  </div>
+  <div class="bar"><div id="xpFill" class="fill"></div></div>
 </div>
 
 <div class="panel">
@@ -131,7 +168,7 @@ button.done{
 
 <div class="panel">
   <h3>📊 Progresso</h3>
-  <canvas id="chart" height="100"></canvas>
+  <canvas id="chart" height="120"></canvas>
 </div>
 
 <div class="panel">
@@ -140,6 +177,8 @@ button.done{
 </div>
 
 </div>
+
+<div id="levelUpText" class="levelup">🔥 LEVEL UP!</div>
 
 <script>
 let data = JSON.parse(localStorage.getItem("game")) || {
@@ -153,19 +192,13 @@ function today(){
 function checkDay(){
   if(data.lastDay !== today()){
     if(data.lastDay){
-      data.history[data.lastDay] = data.points;
+      data.history[data.lastDay]=data.points;
 
-      let y = new Date();
+      let y=new Date();
       y.setDate(y.getDate()-1);
 
-      if(data.lastDay === y.toDateString()){
-        data.streak++;
-      }else{
-        data.streak=1;
-      }
-    }else{
-      data.streak=1;
-    }
+      data.streak = (data.lastDay===y.toDateString()) ? data.streak+1 : 1;
+    } else data.streak=1;
 
     data.points=0;
     data.lastDay=today();
@@ -186,7 +219,7 @@ function done(btn){
   if(data.xp>=10){
     data.level++;
     data.xp=0;
-    alert("🔥 LEVEL UP!");
+    showLevelUp();
   }
 
   checkBadges();
@@ -194,42 +227,41 @@ function done(btn){
   update();
 }
 
+function showLevelUp(){
+  let el=document.getElementById("levelUpText");
+  el.style.display="block";
+  setTimeout(()=>el.style.display="none",1000);
+}
+
 function checkBadges(){
-  if(data.streak>=3 && !data.badges.includes("🔥 3 dias")){
-    data.badges.push("🔥 3 dias");
-  }
-
-  if(data.level>=5 && !data.badges.includes("💪 Nível 5")){
-    data.badges.push("💪 Nível 5");
-  }
-
-  if(data.points>=8 && !data.badges.includes("⚡ Dia forte")){
-    data.badges.push("⚡ Dia forte");
-  }
+  if(data.streak>=3 && !data.badges.includes("🔥 3 dias")) data.badges.push("🔥 3 dias");
+  if(data.level>=5 && !data.badges.includes("💪 Nível 5")) data.badges.push("💪 Nível 5");
+  if(data.points>=8 && !data.badges.includes("⚡ Dia forte")) data.badges.push("⚡ Dia forte");
 }
 
 function drawChart(){
-  const canvas = document.getElementById("chart");
-  const ctx = canvas.getContext("2d");
+  let c=document.getElementById("chart");
+  let ctx=c.getContext("2d");
 
-  const keys = Object.keys(data.history).slice(-7);
+  let keys=Object.keys(data.history).slice(-7);
+  ctx.clearRect(0,0,c.width,c.height);
 
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  keys.forEach((day,i)=>{
-    let val = data.history[day];
-    let x = i*40+10;
-    let y = canvas.height - val*8;
-
+  keys.forEach((d,i)=>{
+    let v=data.history[d];
+    let x=i*50+10;
+    let h=v*10;
     ctx.fillStyle="#00f7ff";
-    ctx.fillRect(x,y,20,val*8);
+    ctx.fillRect(x,c.height-h,25,h);
+
+    ctx.fillStyle="#fff";
+    ctx.fillText(v,x,c.height-h-5);
   });
 }
 
 function renderHistory(){
   let html="";
   Object.keys(data.history).slice(-5).reverse().forEach(d=>{
-    html += `<div>${d}: ${data.history[d]} pts</div>`;
+    html+=`<div class="history-card">${d} - ${data.history[d]} pts</div>`;
   });
   document.getElementById("history").innerHTML=html;
 }
@@ -242,11 +274,8 @@ function update(){
 
   document.getElementById("xpFill").style.width=(data.xp/10*100)+"%";
 
-  let badgeHTML="";
-  data.badges.forEach(b=>{
-    badgeHTML+=`<div class="badge">${b}</div>`;
-  });
-  document.getElementById("badges").innerHTML=badgeHTML;
+  document.getElementById("badges").innerHTML=
+    data.badges.map(b=>`<div class="badge">${b}</div>`).join("");
 
   drawChart();
   renderHistory();
