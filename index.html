@@ -8,25 +8,48 @@
 <style>
 body{
   margin:0;
-  background:linear-gradient(180deg,#050816,#0a1a3a);
-  color:#fff;
   font-family:Arial;
+  background:#030712;
+  color:#fff;
+}
+
+.container{
+  max-width:900px;
+  margin:auto;
   padding:15px;
 }
 
 h1{
   text-align:center;
   color:#00f7ff;
-  text-shadow:0 0 10px #00f7ff;
 }
 
-.box{
+.panel{
   background:#0b1226;
-  border:1px solid #00f7ff44;
+  border:1px solid #00f7ff33;
+  border-radius:15px;
   padding:15px;
-  margin:12px 0;
-  border-radius:14px;
+  margin:10px 0;
   box-shadow:0 0 15px #00f7ff22;
+}
+
+.flex{
+  display:flex;
+  justify-content:space-between;
+}
+
+.bar{
+  height:10px;
+  background:#111;
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:5px;
+}
+
+.fill{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#00f7ff,#00ff88);
 }
 
 .task{
@@ -34,16 +57,13 @@ h1{
   justify-content:space-between;
   margin:8px 0;
   border-bottom:1px solid #ffffff11;
-  padding-bottom:5px;
 }
 
 button{
-  background:linear-gradient(90deg,#00f7ff,#00ff88);
+  background:#00f7ff;
   border:none;
   padding:6px 12px;
   border-radius:8px;
-  cursor:pointer;
-  font-weight:bold;
 }
 
 button.done{
@@ -51,100 +71,168 @@ button.done{
   color:#888;
 }
 
-.xp-bar{
-  height:18px;
-  background:#222;
-  border-radius:10px;
-  overflow:hidden;
-  margin-top:10px;
+.badge{
+  background:#111;
+  padding:5px;
+  margin:5px 0;
+  border-radius:8px;
 }
-
-.xp-fill{
-  height:100%;
-  width:0%;
-  background:linear-gradient(90deg,#00f7ff,#00ff88);
-  box-shadow:0 0 10px #00f7ff;
-}
-
-.level{
-  display:flex;
-  justify-content:space-between;
-}
-
 </style>
 </head>
 
 <body>
 
+<div class="container">
+
 <h1>🎮 LEVEL UP REAL</h1>
 
-<div class="box">
-  <div class="level">
-    <h3>Nível: <span id="level">1</span></h3>
-    <h3>XP: <span id="xp">0</span>/10</h3>
+<div class="panel">
+  <div class="flex">
+    <div>Nível: <span id="level"></span></div>
+    <div>XP: <span id="xp"></span>/10</div>
   </div>
 
-  <div class="xp-bar">
-    <div class="xp-fill" id="xpFill"></div>
+  <div class="bar">
+    <div id="xpFill" class="fill"></div>
   </div>
 </div>
 
-<div class="box">
-  <h3>Pontos: <span id="points">0</span></h3>
+<div class="panel">
+  <div class="flex">
+    <div>Pontos</div>
+    <div id="points"></div>
+  </div>
 </div>
 
-<div class="box">
+<div class="panel">
+  <div class="flex">
+    <div>🔥 Streak</div>
+    <div id="streak"></div>
+  </div>
+</div>
+
+<div class="panel">
   <h3>Missões</h3>
 
-  <div class="task">Leitura <button onclick="complete(this)">+1</button></div>
-  <div class="task">Escrita <button onclick="complete(this)">+1</button></div>
-  <div class="task">Estudo <button onclick="complete(this)">+1</button></div>
-  <div class="task">Falar devagar <button onclick="complete(this)">+1</button></div>
-  <div class="task">Bíblia <button onclick="complete(this)">+1</button></div>
-  <div class="task">Sem espinhas <button onclick="complete(this)">+1</button></div>
-  <div class="task">Menos celular <button onclick="complete(this)">+1</button></div>
-  <div class="task">Água (4-5 garrafas) <button onclick="complete(this)">+1</button></div>
-  <div class="task">Afazeres <button onclick="complete(this)">+1</button></div>
-  <div class="task">Foco total <button onclick="complete(this)">+1</button></div>
+  <div class="task">Leitura <button onclick="done(this)">+1</button></div>
+  <div class="task">Escrita <button onclick="done(this)">+1</button></div>
+  <div class="task">Estudo <button onclick="done(this)">+1</button></div>
+  <div class="task">Falar devagar <button onclick="done(this)">+1</button></div>
+  <div class="task">Bíblia <button onclick="done(this)">+1</button></div>
+  <div class="task">Sem espinhas <button onclick="done(this)">+1</button></div>
+  <div class="task">Menos celular <button onclick="done(this)">+1</button></div>
+  <div class="task">Água <button onclick="done(this)">+1</button></div>
+  <div class="task">Afazeres <button onclick="done(this)">+1</button></div>
+  <div class="task">Foco <button onclick="done(this)">+1</button></div>
+</div>
+
+<div class="panel">
+  <h3>🏆 Conquistas</h3>
+  <div id="badges"></div>
+</div>
 
 </div>
 
 <script>
-let points=0;
-let xp=0;
-let level=1;
+let data = JSON.parse(localStorage.getItem("game")) || {
+  xp:0,
+  level:1,
+  points:0,
+  streak:0,
+  lastDay:null,
+  badges:[]
+};
 
-function complete(btn){
+function today(){
+  return new Date().toDateString();
+}
+
+function checkDay(){
+  if(data.lastDay !== today()){
+    if(data.lastDay){
+      let yesterday = new Date();
+      yesterday.setDate(yesterday.getDate()-1);
+
+      if(data.lastDay === yesterday.toDateString()){
+        data.streak++;
+      }else{
+        data.streak=1;
+      }
+    }else{
+      data.streak=1;
+    }
+
+    data.points=0;
+    data.lastDay=today();
+    resetButtons();
+  }
+}
+
+function done(btn){
   if(btn.disabled) return;
 
-  points++;
-  xp++;
-
-  document.getElementById("points").innerText=points;
-  document.getElementById("xp").innerText=xp;
+  data.points++;
+  data.xp++;
 
   btn.disabled=true;
   btn.innerText="✔";
   btn.classList.add("done");
 
-  updateXP();
+  if(data.xp>=10){
+    data.level++;
+    data.xp=0;
+    alert("🔥 LEVEL UP!");
+  }
+
+  checkBadges();
+  save();
+  update();
 }
 
-function updateXP(){
-  let percent=(xp/10)*100;
-  document.getElementById("xpFill").style.width=percent+"%";
+function checkBadges(){
+  if(data.streak>=3 && !data.badges.includes("🔥 3 dias")){
+    data.badges.push("🔥 3 dias");
+  }
 
-  if(xp>=10){
-    level++;
-    xp=0;
+  if(data.level>=5 && !data.badges.includes("💪 Nível 5")){
+    data.badges.push("💪 Nível 5");
+  }
 
-    document.getElementById("level").innerText=level;
-    document.getElementById("xp").innerText=xp;
-
-    alert("🔥 LEVEL UP! Nível "+level);
-    updateXP();
+  if(data.points>=8 && !data.badges.includes("⚡ Dia forte")){
+    data.badges.push("⚡ Dia forte");
   }
 }
+
+function update(){
+  document.getElementById("xp").innerText=data.xp;
+  document.getElementById("level").innerText=data.level;
+  document.getElementById("points").innerText=data.points;
+  document.getElementById("streak").innerText=data.streak;
+
+  document.getElementById("xpFill").style.width=(data.xp/10*100)+"%";
+
+  let badgeHTML="";
+  data.badges.forEach(b=>{
+    badgeHTML+=`<div class="badge">${b}</div>`;
+  });
+
+  document.getElementById("badges").innerHTML=badgeHTML;
+}
+
+function save(){
+  localStorage.setItem("game", JSON.stringify(data));
+}
+
+function resetButtons(){
+  document.querySelectorAll("button").forEach(b=>{
+    b.disabled=false;
+    b.innerText="+1";
+    b.classList.remove("done");
+  });
+}
+
+checkDay();
+update();
 </script>
 
 </body>
