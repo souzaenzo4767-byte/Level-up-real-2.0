@@ -91,7 +91,6 @@ button.done{
     <div>Nível: <span id="level"></span></div>
     <div>XP: <span id="xp"></span>/10</div>
   </div>
-
   <div class="bar">
     <div id="xpFill" class="fill"></div>
   </div>
@@ -113,7 +112,6 @@ button.done{
 
 <div class="panel">
   <h3>Missões</h3>
-
   <div class="task">Leitura <button onclick="done(this)">+1</button></div>
   <div class="task">Escrita <button onclick="done(this)">+1</button></div>
   <div class="task">Estudo <button onclick="done(this)">+1</button></div>
@@ -131,16 +129,21 @@ button.done{
   <div id="badges"></div>
 </div>
 
+<div class="panel">
+  <h3>📊 Progresso</h3>
+  <canvas id="chart" height="100"></canvas>
+</div>
+
+<div class="panel">
+  <h3>📅 Histórico</h3>
+  <div id="history"></div>
+</div>
+
 </div>
 
 <script>
 let data = JSON.parse(localStorage.getItem("game")) || {
-  xp:0,
-  level:1,
-  points:0,
-  streak:0,
-  lastDay:null,
-  badges:[]
+  xp:0, level:1, points:0, streak:0, lastDay:null, badges:[], history:{}
 };
 
 function today(){
@@ -150,10 +153,12 @@ function today(){
 function checkDay(){
   if(data.lastDay !== today()){
     if(data.lastDay){
-      let yesterday = new Date();
-      yesterday.setDate(yesterday.getDate()-1);
+      data.history[data.lastDay] = data.points;
 
-      if(data.lastDay === yesterday.toDateString()){
+      let y = new Date();
+      y.setDate(y.getDate()-1);
+
+      if(data.lastDay === y.toDateString()){
         data.streak++;
       }else{
         data.streak=1;
@@ -203,6 +208,32 @@ function checkBadges(){
   }
 }
 
+function drawChart(){
+  const canvas = document.getElementById("chart");
+  const ctx = canvas.getContext("2d");
+
+  const keys = Object.keys(data.history).slice(-7);
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  keys.forEach((day,i)=>{
+    let val = data.history[day];
+    let x = i*40+10;
+    let y = canvas.height - val*8;
+
+    ctx.fillStyle="#00f7ff";
+    ctx.fillRect(x,y,20,val*8);
+  });
+}
+
+function renderHistory(){
+  let html="";
+  Object.keys(data.history).slice(-5).reverse().forEach(d=>{
+    html += `<div>${d}: ${data.history[d]} pts</div>`;
+  });
+  document.getElementById("history").innerHTML=html;
+}
+
 function update(){
   document.getElementById("xp").innerText=data.xp;
   document.getElementById("level").innerText=data.level;
@@ -215,8 +246,10 @@ function update(){
   data.badges.forEach(b=>{
     badgeHTML+=`<div class="badge">${b}</div>`;
   });
-
   document.getElementById("badges").innerHTML=badgeHTML;
+
+  drawChart();
+  renderHistory();
 }
 
 function save(){
