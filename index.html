@@ -1,66 +1,77 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Level Up Real</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Level Up Real</title>
 
-  <style>
-    body {
-      margin: 0;
-      background: #050816;
-      color: white;
-      font-family: Arial, sans-serif;
-      padding: 15px;
-    }
+<style>
+body{
+  margin:0;
+  background:linear-gradient(180deg,#050816,#0a1a3a);
+  color:#fff;
+  font-family:Arial;
+  padding:15px;
+}
 
-    h1 {
-      text-align: center;
-      color: cyan;
-    }
+h1{
+  text-align:center;
+  color:#00f7ff;
+  text-shadow:0 0 10px #00f7ff;
+}
 
-    .box {
-      border: 1px solid cyan;
-      padding: 15px;
-      margin: 10px 0;
-      border-radius: 12px;
-      box-shadow: 0 0 10px #00f7ff33;
-    }
+.box{
+  background:#0b1226;
+  border:1px solid #00f7ff44;
+  padding:15px;
+  margin:12px 0;
+  border-radius:14px;
+  box-shadow:0 0 15px #00f7ff22;
+}
 
-    .task {
-      display: flex;
-      justify-content: space-between;
-      margin: 6px 0;
-    }
+.task{
+  display:flex;
+  justify-content:space-between;
+  margin:8px 0;
+  border-bottom:1px solid #ffffff11;
+  padding-bottom:5px;
+}
 
-    button {
-      background: cyan;
-      border: none;
-      padding: 6px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+button{
+  background:linear-gradient(90deg,#00f7ff,#00ff88);
+  border:none;
+  padding:6px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+}
 
-    button.done {
-      background: #333;
-      color: #aaa;
-    }
+button.done{
+  background:#222;
+  color:#888;
+}
 
-    .xp-bar {
-      width: 100%;
-      height: 18px;
-      background: #222;
-      border-radius: 10px;
-      overflow: hidden;
-      margin-top: 10px;
-    }
+.xp-bar{
+  height:18px;
+  background:#222;
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:10px;
+}
 
-    .xp-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, cyan, lime);
-    }
-  </style>
+.xp-fill{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#00f7ff,#00ff88);
+  box-shadow:0 0 10px #00f7ff;
+}
+
+.level{
+  display:flex;
+  justify-content:space-between;
+}
+
+</style>
 </head>
 
 <body>
@@ -68,8 +79,10 @@
 <h1>🎮 LEVEL UP REAL</h1>
 
 <div class="box">
-  <h3>Nível: <span id="level">1</span></h3>
-  <h3>XP: <span id="xp">0</span>/10</h3>
+  <div class="level">
+    <h3>Nível: <span id="level">1</span></h3>
+    <h3>XP: <span id="xp">0</span>/10</h3>
+  </div>
 
   <div class="xp-bar">
     <div class="xp-fill" id="xpFill"></div>
@@ -77,7 +90,7 @@
 </div>
 
 <div class="box">
-  <h3>Pontos do dia: <span id="points">0</span></h3>
+  <h3>Pontos: <span id="points">0</span></h3>
 </div>
 
 <div class="box">
@@ -97,43 +110,42 @@
 </div>
 
 <script>
-  let points = 0;
-  let xp = 0;
-  let level = 1;
+let points=0;
+let xp=0;
+let level=1;
 
-  function complete(btn) {
-    if (btn.disabled) return;
+function complete(btn){
+  if(btn.disabled) return;
 
-    points++;
-    xp++;
+  points++;
+  xp++;
 
-    document.getElementById("points").innerText = points;
-    document.getElementById("xp").innerText = xp;
+  document.getElementById("points").innerText=points;
+  document.getElementById("xp").innerText=xp;
 
-    btn.disabled = true;
-    btn.innerText = "✔";
-    btn.classList.add("done");
+  btn.disabled=true;
+  btn.innerText="✔";
+  btn.classList.add("done");
 
+  updateXP();
+}
+
+function updateXP(){
+  let percent=(xp/10)*100;
+  document.getElementById("xpFill").style.width=percent+"%";
+
+  if(xp>=10){
+    level++;
+    xp=0;
+
+    document.getElementById("level").innerText=level;
+    document.getElementById("xp").innerText=xp;
+
+    alert("🔥 LEVEL UP! Nível "+level);
     updateXP();
   }
-
-  function updateXP() {
-    let percent = (xp / 10) * 100;
-    document.getElementById("xpFill").style.width = percent + "%";
-
-    if (xp >= 10) {
-      level++;
-      xp = 0;
-
-      document.getElementById("level").innerText = level;
-      document.getElementById("xp").innerText = xp;
-
-      alert("🔥 LEVEL UP! Agora você é nível " + level);
-
-      updateXP();
-    }
-  }
+}
 </script>
 
 </body>
-</html>:
+</html>
